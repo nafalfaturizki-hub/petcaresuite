@@ -71,8 +71,7 @@ export const authService = {
       role: data.role,
       isActive: data.is_active
     };
-  }
-,
+  },
 
   async createProfile(userId: string, email: string, fullName: string, role: AuthUserPayload['role'] = 'customer') {
     const { data, error } = await supabase

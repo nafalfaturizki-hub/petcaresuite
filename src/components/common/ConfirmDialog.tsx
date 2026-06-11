@@ -1,38 +1,42 @@
 import * as React from 'react';
-import { Button } from '@/components/ui';
-import { AlertTriangle } from 'lucide-react';
+import { Button, Dialog, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui';
 
 interface ConfirmDialogProps {
   open: boolean;
+  onOpenChange: (open: boolean) => void;
   title: string;
   description: string;
-  variant?: 'default' | 'danger';
   onConfirm: () => void;
-  onCancel: () => void;
+  isLoading?: boolean;
+  variant?: 'danger' | 'warning' | 'default';
 }
 
-export function ConfirmDialog({ open, title, description, variant = 'default', onConfirm, onCancel }: ConfirmDialogProps) {
-  if (!open) return null;
+const variantStyles: Record<NonNullable<ConfirmDialogProps['variant']>, string> = {
+  default: 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-slate-200',
+  warning: 'bg-amber-500 text-white hover:bg-amber-600',
+  danger: 'bg-red-600 text-white hover:bg-red-700'
+};
 
+export function ConfirmDialog({ open, onOpenChange, title, description, onConfirm, isLoading = false, variant = 'default' }: ConfirmDialogProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-8">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-950">
-        <div className="mb-4 flex items-center gap-3 text-slate-900 dark:text-slate-100">
-          <AlertTriangle className="h-6 w-6 text-red-600" />
-          <div>
-            <h2 className="text-xl font-semibold">{title}</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{description}</p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogContent className="max-w-md">
+          <div className="space-y-4">
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
           </div>
-        </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button variant={variant === 'danger' ? 'danger' : 'default'} onClick={onConfirm}>
-            Confirm
-          </Button>
-        </div>
-      </div>
-    </div>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button className={variantStyles[variant]} onClick={onConfirm} disabled={isLoading}>
+              {isLoading ? 'Processing...' : 'Confirm'}
+            </Button>
+          </div>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   );
 }

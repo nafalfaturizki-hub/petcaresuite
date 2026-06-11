@@ -70,13 +70,13 @@ export const notificationsService = {
   },
 
   async getEmailConfig(): Promise<EmailConfig | null> {
-    const { data, error } = await supabase.from('settings').select('value').eq('key', 'email_config').single();
+    const { data, error } = await supabase.from('settings').select('value').eq('key', 'smtp_config').single();
     if (error) return null;
     return data?.value || null;
   },
 
   async saveEmailConfig(cfg: EmailConfig) {
-    const { error } = await supabase.from('settings').upsert({ key: 'email_config', value: cfg }).select();
+    const { error } = await supabase.from('settings').upsert({ key: 'smtp_config', value: cfg }).select();
     if (error) throw new Error(error.message);
     return true;
   },

@@ -8,6 +8,7 @@ export function LoginPage() {
   const { signIn } = useAuthActions();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,7 +43,23 @@ export function LoginPage() {
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium">Password</label>
-              <Input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required placeholder="••••••••" />
+              <div className="relative">
+                <Input
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  className="pr-20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 text-sm text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
             </div>
             {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

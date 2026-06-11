@@ -17,7 +17,10 @@ const routes = [
   { label: 'Inventory', path: '/staff/inventory' },
   { label: 'POS', path: '/staff/pos' },
   { label: 'Billing', path: '/staff/invoices' },
-  { label: 'Medical Records', path: '/doctor/medical-records' }
+  { label: 'Medical Records', path: '/doctor/medical-records' },
+  { label: 'Reports', path: '/staff/reports/financial' },
+  { label: 'Clinic Settings', path: '/staff/settings/clinic' },
+  { label: 'Profile', path: '/profile' }
 ];
 
 const breadcrumbLabelMap: Record<string, string> = {
@@ -98,7 +101,6 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
           <Navbar
             onOpenCommand={() => setCommandPaletteOpen(true)}
             onToggleSidebar={() => setIsMobileSidebarOpen((open) => !open)}
-            unreadCount={3}
           />
           <div className="border-b border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 lg:px-6">
             <nav className="flex flex-wrap items-center gap-2">

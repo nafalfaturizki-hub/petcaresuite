@@ -22,4 +22,13 @@ export type StockMovementType = 'inbound' | 'outbound' | 'adjustment';
 
 export type NotificationProvider = 'email' | 'whatsapp' | 'sms';
 
+export type InvoiceStatus = 'draft' | 'paid' | 'pending' | 'cancelled' | 'refunded';
+export type MedicalRecordType = 'consultation' | 'follow-up' | 'emergency' | 'surgery';
+export type GroomingStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+export type InpatientStatus = 'admitted' | 'discharged' | 'transferred';
+export type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+export type TransactionType = 'credit' | 'debit';
+export type MovementType = 'inbound' | 'outbound' | 'adjustment';
+export type NotificationStatus = 'sent' | 'failed' | 'pending';
+
 export type ModuleStatus = Record<ModuleKey, boolean>;

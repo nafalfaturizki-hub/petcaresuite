@@ -16,7 +16,7 @@ interface NavItem {
 }
 
 const items: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: Home, section: 'main', roles: ['owner', 'doctor', 'staff'], moduleKey: 'clinic' },
+  { label: 'Dashboard', path: '/dashboard', icon: Home, section: 'main', roles: ['owner', 'doctor', 'staff', 'customer'] },
   { label: 'Appointments', path: '/staff/appointments', icon: CalendarDays, section: 'clinical', roles: ['owner', 'doctor', 'staff'], moduleKey: 'clinic' },
   { label: 'Medical', path: '/doctor/medical-records', icon: Stethoscope, section: 'clinical', roles: ['owner', 'doctor'], moduleKey: 'clinic' },
   { label: 'Vaccinations', path: '/staff/vaccinations', icon: ShieldCheck, section: 'clinical', roles: ['owner', 'doctor', 'staff'], moduleKey: 'clinic' },
@@ -30,8 +30,13 @@ const items: NavItem[] = [
   { label: 'POS', path: '/staff/pos', icon: ShoppingCart, section: 'finance', roles: ['owner', 'staff'], moduleKey: 'accounting' },
   { label: 'Billing', path: '/staff/invoices', icon: Wallet, section: 'finance', roles: ['owner', 'staff'], moduleKey: 'accounting' },
   { label: 'Accounting', path: '/staff/accounting', icon: DollarSign, section: 'finance', roles: ['owner', 'staff'], moduleKey: 'accounting' },
-  { label: 'Reports', path: '/dashboard/reports', icon: FileText, section: 'system', roles: ['owner'] },
-  { label: 'Settings', path: '/dashboard/settings', icon: Settings, section: 'system', roles: ['owner'] }
+  { label: 'Reports', path: '/staff/reports/financial', icon: FileText, section: 'system', roles: ['owner'] },
+  { label: 'Clinic Settings', path: '/staff/settings/clinic', icon: Settings, section: 'system', roles: ['owner'] },
+  { label: 'Invoice Settings', path: '/staff/settings/invoice', icon: FileText, section: 'system', roles: ['owner'] },
+  { label: 'Business Hours', path: '/staff/settings/hours', icon: CalendarDays, section: 'system', roles: ['owner'] },
+  { label: 'WhatsApp', path: '/staff/settings/whatsapp', icon: ShieldCheck, section: 'system', roles: ['owner'] },
+  { label: 'Email', path: '/staff/settings/email', icon: Wallet, section: 'system', roles: ['owner'] },
+  { label: 'Modules', path: '/staff/settings/modules', icon: Box, section: 'system', roles: ['owner'] }
 ];
 
 interface SidebarProps {

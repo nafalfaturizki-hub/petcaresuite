@@ -18,3 +18,10 @@ export function useCreateInvoice() {
     onSuccess: () => queryClient.invalidateQueries(['invoices'])
   });
 }
+
+export function useProcessRefund() {
+  const queryClient = useQueryClient();
+  return useMutation((payload: { invoiceId: string; amount: number; reason: string; processedBy: string }) => posService.processRefund(payload), {
+    onSuccess: (_data, variables) => queryClient.invalidateQueries(['invoice', variables.invoiceId])
+  });
+}

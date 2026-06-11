@@ -4,6 +4,7 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import RoleBasedRedirect from '@/features/auth/RoleBasedRedirect';
 import CustomersPage from '@/features/customers/pages/CustomersPage';
 import CreateCustomerPage from '@/features/customers/pages/CreateCustomerPage';
 import CustomerDetailPage from '@/features/customers/pages/CustomerDetailPage';
@@ -36,6 +37,8 @@ import MonitoringDetailPage from '@/features/monitoring/pages/MonitoringDetailPa
 import InventoryPage from '@/features/inventory/pages/InventoryPage';
 import { InvoicesPage } from '@/pages/InvoicesPage';
 import PosPage from '@/features/pos/pages/PosPage';
+import TransactionsPage from '@/features/pos/pages/TransactionsPage';
+import InvoiceDetailPage from '@/features/pos/pages/InvoiceDetailPage';
 import PetshopPage from '@/features/petshop/pages/PetshopPage';
 import GroomingPage from '@/features/grooming/pages/GroomingPage';
 import InpatientPage from '@/features/inpatient/pages/InpatientPage';
@@ -48,6 +51,9 @@ import ClinicProfilePage from '@/features/settings/pages/ClinicProfilePage';
 import InvoiceSettingsPage from '@/features/settings/pages/InvoiceSettingsPage';
 import BusinessHoursPage from '@/features/settings/pages/BusinessHoursPage';
 import AuditLogPage from '@/features/settings/pages/AuditLogPage';
+import WhatsAppSettingsPage from '@/features/settings/pages/WhatsAppSettingsPage';
+import EmailSettingsPage from '@/features/settings/pages/EmailSettingsPage';
+import ModuleManagerPage from '@/features/settings/pages/ModuleManagerPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -68,7 +74,7 @@ export function AppRoutes() {
       </Route>
 
       <Route element={<AuthGuard><AppShell /></AuthGuard>}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<RoleBasedRedirect />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="staff/customers" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><CustomersPage /></RoleGuard>} />
         <Route path="staff/customers/create" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><CreateCustomerPage /></RoleGuard>} />
@@ -84,6 +90,8 @@ export function AppRoutes() {
         <Route path="staff/appointments/:id" element={<RoleGuard allowedRoles={[ 'owner', 'doctor', 'staff' ]}><AppointmentDetailPage /></RoleGuard>} />
         <Route path="staff/inventory" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InventoryPage /></RoleGuard>} />
         <Route path="staff/pos" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><PosPage /></RoleGuard>} />
+        <Route path="staff/pos/transactions" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><TransactionsPage /></RoleGuard>} />
+        <Route path="staff/pos/transactions/:id" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InvoiceDetailPage /></RoleGuard>} />
         <Route path="staff/invoices" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InvoicesPage /></RoleGuard>} />
         <Route path="staff/petshop" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><PetshopPage /></RoleGuard>} />
         <Route path="staff/grooming" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><GroomingPage /></RoleGuard>} />
@@ -106,6 +114,9 @@ export function AppRoutes() {
         <Route path="staff/settings/invoice" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InvoiceSettingsPage /></RoleGuard>} />
         <Route path="staff/settings/hours" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><BusinessHoursPage /></RoleGuard>} />
         <Route path="staff/settings/audit" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><AuditLogPage /></RoleGuard>} />
+        <Route path="staff/settings/whatsapp" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><WhatsAppSettingsPage /></RoleGuard>} />
+        <Route path="staff/settings/email" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><EmailSettingsPage /></RoleGuard>} />
+        <Route path="staff/settings/modules" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><ModuleManagerPage /></RoleGuard>} />
         <Route path="profile" element={<RoleGuard allowedRoles={[ 'owner', 'doctor', 'staff', 'customer' ]}><ProfilePage /></RoleGuard>} />
         <Route path="403" element={<ForbiddenPage />} />
         <Route path="*" element={<NotFoundPage />} />

@@ -1,23 +1,30 @@
 import * as React from 'react';
-import { Loader2 } from 'lucide-react';
 import { EmptyState } from './EmptyState';
-import { Button } from '@/components/ui';
+import { Button, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+import { Loader2 } from 'lucide-react';
 
 export interface Column<T> {
   key: string;
-  title: string;
+  header: React.ReactNode;
   render?: (record: T) => React.ReactNode;
-  className?: string;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+interface PaginationProps {
+  page: number;
+  pageSize: number;
+  total: number;
 }
 
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
   isLoading?: boolean;
-  pagination?: { page: number; pageSize: number; total: number };
+  pagination?: PaginationProps;
   onPageChange?: (page: number) => void;
-  filters?: React.ReactNode;
-  actions?: React.ReactNode;
+  filtersSlot?: React.ReactNode;
+  actionsSlot?: React.ReactNode;
   onRowClick?: (record: T) => void;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -29,72 +36,95 @@ export function DataTable<T extends { id: string }>({
   isLoading = false,
   pagination,
   onPageChange,
-  filters,
-  actions,
+  filtersSlot,
+  actionsSlot,
   onRowClick,
   emptyTitle = 'No records found',
   emptyDescription = 'Try adjusting your filters or search terms.'
 }: DataTableProps<T>) {
+  const totalPages = pagination ? Math.max(1, Math.ceil(pagination.total / pagination.pageSize)) : 1;
+
   if (isLoading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="animate-pulse rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900" />
+          <div key={index} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <Skeleton width="30%" height="1rem" />
+              <Skeleton width="10%" height="1rem" />
+            </div>
+            {Array.from({ length: 4 }).map((_, rowIndex) => (
+              <div key={rowIndex} className="grid gap-3 md:grid-cols-4">
+                <Skeleton width="100%" height="1rem" />
+                <Skeleton width="100%" height="1rem" />
+                <Skeleton width="100%" height="1rem" />
+                <Skeleton width="100%" height="1rem" />
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     );
   }
 
   if (!data.length) {
-    return <EmptyState icon={Loader2} title={emptyTitle} description={emptyDescription} action={actions ?? null} />;
+    return <EmptyState icon={Loader2} title={emptyTitle} description={emptyDescription} action={actionsSlot ?? null} />;
   }
 
   return (
     <div className="space-y-4">
-      {(filters || actions) && (
+      {(filtersSlot || actionsSlot) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>{filters}</div>
-          <div>{actions}</div>
+          <div>{filtersSlot}</div>
+          <div>{actionsSlot}</div>
         </div>
       )}
+
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
-        <table className="min-w-full text-left text-sm text-slate-700 dark:text-slate-200">
-          <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
-            <tr>
+        <Table>
+          <TableHead>
+            <TableRow>
               {columns.map((column) => (
-                <th key={column.key} className={column.className ?? 'px-4 py-3 font-semibold'}>
-                  {column.title}
-                </th>
+                <TableHeader key={column.key} style={column.width ? { width: column.width } : undefined}>
+                  <div className={column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'}>
+                    {column.header}
+                  </div>
+                </TableHeader>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {data.map((record) => (
-              <tr
+              <TableRow
                 key={record.id}
-                className={onRowClick ? 'cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-900' : ''}
+                className={onRowClick ? 'cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-900' : undefined}
                 onClick={onRowClick ? () => onRowClick(record) : undefined}
               >
                 {columns.map((column) => (
-                  <td key={`${record.id}-${column.key}`} className={column.className ?? 'px-4 py-4'}>
+                  <TableCell
+                    key={`${record.id}-${column.key}`}
+                    className={column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'}
+                    style={column.width ? { width: column.width } : undefined}
+                  >
                     {column.render ? column.render(record) : (record as any)[column.key]}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
+
       {pagination && onPageChange && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-3xl border border-slate-200 bg-white p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
           <span>
-            Page {pagination.page} of {Math.ceil(pagination.total / pagination.pageSize)}
+            Page {pagination.page} of {totalPages}
           </span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled={pagination.page <= 1} onClick={() => onPageChange(pagination.page - 1)}>
               Previous
             </Button>
-            <Button variant="outline" size="sm" disabled={pagination.page >= Math.ceil(pagination.total / pagination.pageSize)} onClick={() => onPageChange(pagination.page + 1)}>
+            <Button variant="outline" size="sm" disabled={pagination.page >= totalPages} onClick={() => onPageChange(pagination.page + 1)}>
               Next
             </Button>
           </div>

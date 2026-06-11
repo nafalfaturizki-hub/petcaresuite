@@ -4,3 +4,4 @@ export * from './DataTable';
 export * from './EmptyState';
 export * from './FileUpload';
 export * from './PageHeader';
+export * from './StatusBadge';

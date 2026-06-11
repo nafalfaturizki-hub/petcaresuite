@@ -1,36 +1,66 @@
-export interface InvoiceItem {
+export type ItemType = 'product' | 'service';
+
+export interface CartItem {
   id: string;
-  invoiceId: string;
-  itemType: string;
-  referenceId?: string | null;
   name: string;
-  quantity: number;
+  itemType: ItemType;
+  referenceId?: string | null;
   unitPrice: number;
-  discount: number;
+  quantity: number;
+  discountAmount: number;
   total: number;
-  createdAt: string;
 }
 
-export interface Invoice {
-  id: string;
-  invoiceNumber: string;
+export interface Cart {
+  items: CartItem[];
   customerId?: string | null;
-  appointmentId?: string | null;
-  inpatientRecordId?: string | null;
+  customerName?: string | null;
+  loyaltyPointsAvailable?: number;
+  loyaltyPointsToRedeem?: number;
   subtotal: number;
-  discountAmount: number;
-  loyaltyPointsUsed: number;
+  discountTotal: number;
+  loyaltyDiscount: number;
   total: number;
-  paymentMethod: string;
-  paymentMethodSecondary?: string | null;
+}
+
+export type PaymentMethod = 'cash' | 'card' | 'bank-transfer' | 'e-wallet';
+
+export interface PaymentData {
+  method: PaymentMethod;
+  methodSecondary?: PaymentMethod | null;
   paidAmount: number;
+  paidAmountSecondary?: number | null;
   changeAmount: number;
+  splitEnabled: boolean;
+  reference?: string | null;
+}
+
+export interface InvoiceCreatePayload {
+  invoice_number?: string;
+  customer_id?: string | null;
+  appointment_id?: string | null;
+  inpatient_record_id?: string | null;
+  subtotal: number;
+  discount_amount: number;
+  loyalty_points_used: number;
+  loyalty_discount_amount: number;
+  total: number;
+  payment_method: PaymentMethod;
+  payment_method_secondary?: PaymentMethod | null;
+  paid_amount: number;
+  change_amount: number;
   status: string;
   notes?: string | null;
-  createdBy?: string | null;
-  createdAt: string;
-  paidAt?: string | null;
-  items: InvoiceItem[];
+  created_by?: string | null;
+  items: Array<{
+    item_type: ItemType | string;
+    reference_id?: string | null;
+    name: string;
+    quantity: number;
+    unit_price: number;
+    discount: number;
+    total: number;
+  }>;
 }
 
 export interface InvoiceQueryParams {
@@ -38,28 +68,7 @@ export interface InvoiceQueryParams {
   pageSize?: number;
   search?: string;
   status?: string;
-}
-
-export interface InvoiceCreatePayload {
-  customerId?: string;
-  appointmentId?: string;
-  inpatientRecordId?: string;
-  subtotal: number;
-  discountAmount: number;
-  loyaltyPointsUsed: number;
-  total: number;
-  paymentMethod: string;
-  paidAmount: number;
-  changeAmount: number;
-  status: string;
-  notes?: string;
-  items: Array<{
-    itemType: string;
-    referenceId?: string;
-    name: string;
-    quantity: number;
-    unitPrice: number;
-    discount: number;
-    total: number;
-  }>;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  paymentMethod?: PaymentMethod | null;
 }
