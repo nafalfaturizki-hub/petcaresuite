@@ -16,12 +16,12 @@ export default function NotificationLogPage() {
       <div>
         <DataTable
           columns={[
-            { key: 'channel', title: 'Channel', render: (r: any) => <Badge>{r.channel.toUpperCase()}</Badge> },
-            { key: 'recipient', title: 'Recipient' },
-            { key: 'template', title: 'Template', render: (r: any) => r.template_key || '-' },
-            { key: 'status', title: 'Status', render: (r: any) => r.status === 'success' ? <Badge className="bg-green-100 text-green-800">Success</Badge> : (r.status === 'failed' ? <Badge className="bg-red-100 text-red-800">Failed</Badge> : <Badge>Pending</Badge>) },
-            { key: 'sentAt', title: 'Sent At', render: (r: any) => r.sent_at ? new Date(r.sent_at).toLocaleString() : '-' },
-            { key: 'actions', title: 'Actions', render: (r: any) => r.status === 'failed' ? <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); retry.mutate(r.id); }}>Retry</Button> : null }
+            { key: 'channel', header: 'Channel', render: (r: any) => <Badge>{r.channel.toUpperCase()}</Badge> },
+            { key: 'recipient', header: 'Recipient' },
+            { key: 'template', header: 'Template', render: (r: any) => r.template_key || '-' },
+            { key: 'status', header: 'Status', render: (r: any) => r.status === 'success' ? <Badge className="bg-green-100 text-green-800">Success</Badge> : (r.status === 'failed' ? <Badge className="bg-red-100 text-red-800">Failed</Badge> : <Badge>Pending</Badge>) },
+            { key: 'sentAt', header: 'Sent At', render: (r: any) => r.sent_at ? new Date(r.sent_at).toLocaleString() : '-' },
+            { key: 'actions', header: 'Actions', render: (r: any) => r.status === 'failed' ? <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); retry.mutate(r.id); }}>Retry</Button> : null }
           ]}
           data={items as any}
           isLoading={isLoading}

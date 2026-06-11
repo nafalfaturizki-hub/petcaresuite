@@ -14,7 +14,7 @@ export default function RoleBasedRedirect() {
     case 'staff':
       return <Navigate to="/staff/customers" replace />;
     case 'customer':
-      return <Navigate to="/staff/pets" replace />;
+      return <Navigate to="/portal" replace />;
     default:
       return <Navigate to="/dashboard" replace />;
   }

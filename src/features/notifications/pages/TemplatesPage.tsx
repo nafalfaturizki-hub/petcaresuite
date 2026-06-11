@@ -22,10 +22,10 @@ export default function TemplatesPage() {
       <div>
         <DataTable
           columns={[
-            { key: 'key', title: 'Key' },
-            { key: 'title', title: 'Title' },
-            { key: 'body', title: 'Body', render: (r: any) => <div className="truncate max-w-md">{r.body}</div> },
-            { key: 'actions', title: 'Actions', render: (r: any) => <Button size="sm" onClick={() => setEditing(r)}>Edit</Button> }
+            { key: 'key', header: 'Key' },
+            { key: 'title', header: 'Title' },
+            { key: 'body', header: 'Body', render: (r: any) => <div className="truncate max-w-md">{r.body}</div> },
+            { key: 'actions', header: 'Actions', render: (r: any) => <Button size="sm" onClick={() => setEditing(r)}>Edit</Button> }
           ]}
           data={items as any}
           isLoading={isLoading}

@@ -25,6 +25,8 @@ import PublicLayout from '@/features/website/PublicLayout';
 import HomePagePublic from '@/features/website/pages/Public/HomePage';
 import ArticlesPagePublic from '@/features/website/pages/Public/ArticlesPage';
 import ArticleDetailPage from '@/features/website/pages/Public/ArticleDetailPage';
+import ServicesPagePublic from '@/features/website/pages/Public/ServicesPage';
+import ContactPagePublic from '@/features/website/pages/Public/ContactPage';
 
 import CreateMedicalRecordPage from '@/features/medical-records/pages/CreateMedicalRecordPage';
 import MedicalRecordDetailPage from '@/features/medical-records/pages/MedicalRecordDetailPage';
@@ -40,6 +42,8 @@ import PosPage from '@/features/pos/pages/PosPage';
 import TransactionsPage from '@/features/pos/pages/TransactionsPage';
 import InvoiceDetailPage from '@/features/pos/pages/InvoiceDetailPage';
 import PetshopPage from '@/features/petshop/pages/PetshopPage';
+import ProductFormPage from '@/features/petshop/pages/ProductFormPage';
+import ProductDetailPage from '@/features/petshop/pages/ProductDetailPage';
 import GroomingPage from '@/features/grooming/pages/GroomingPage';
 import InpatientPage from '@/features/inpatient/pages/InpatientPage';
 import AccountingPage from '@/features/accounting/pages/AccountingPage';
@@ -47,6 +51,10 @@ import NotificationLogPage from '@/features/notifications/pages/NotificationLogP
 import TemplatesPage from '@/features/notifications/pages/TemplatesPage';
 import BroadcastPage from '@/features/notifications/pages/BroadcastPage';
 import FinancialReportsPage from '@/features/reports/pages/FinancialReportsPage';
+import ClinicalReportsPage from '@/features/reports/pages/ClinicalReportsPage';
+import DoctorReportsPage from '@/features/reports/pages/DoctorReportsPage';
+import InventoryReportsPage from '@/features/reports/pages/InventoryReportsPage';
+import ProductReportsPage from '@/features/reports/pages/ProductReportsPage';
 import ClinicProfilePage from '@/features/settings/pages/ClinicProfilePage';
 import InvoiceSettingsPage from '@/features/settings/pages/InvoiceSettingsPage';
 import BusinessHoursPage from '@/features/settings/pages/BusinessHoursPage';
@@ -59,6 +67,11 @@ import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { AuthGuard } from '@/features/auth/AuthGuard';
 import { RoleGuard } from '@/features/auth/RoleGuard';
+import PortalLayout from '@/features/portal/PortalLayout';
+import PortalOverviewPage from '@/features/portal/pages/PortalOverviewPage';
+import PortalPetsPage from '@/features/portal/pages/PortalPetsPage';
+import PortalAppointmentsPage from '@/features/portal/pages/PortalAppointmentsPage';
+import PortalInvoicesPage from '@/features/portal/pages/PortalInvoicesPage';
 
 export function AppRoutes() {
   return (
@@ -71,6 +84,15 @@ export function AppRoutes() {
         <Route path="/" element={<HomePagePublic />} />
         <Route path="/articles" element={<ArticlesPagePublic />} />
         <Route path="/articles/:slug" element={<ArticleDetailPage />} />
+        <Route path="/services" element={<ServicesPagePublic />} />
+        <Route path="/contact" element={<ContactPagePublic />} />
+      </Route>
+
+      <Route element={<AuthGuard><PortalLayout /></AuthGuard>}>
+        <Route path="portal" element={<RoleGuard allowedRoles={['customer']}><PortalOverviewPage /></RoleGuard>} />
+        <Route path="portal/pets" element={<RoleGuard allowedRoles={['customer']}><PortalPetsPage /></RoleGuard>} />
+        <Route path="portal/appointments" element={<RoleGuard allowedRoles={['customer']}><PortalAppointmentsPage /></RoleGuard>} />
+        <Route path="portal/invoices" element={<RoleGuard allowedRoles={['customer']}><PortalInvoicesPage /></RoleGuard>} />
       </Route>
 
       <Route element={<AuthGuard><AppShell /></AuthGuard>}>
@@ -94,6 +116,9 @@ export function AppRoutes() {
         <Route path="staff/pos/transactions/:id" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InvoiceDetailPage /></RoleGuard>} />
         <Route path="staff/invoices" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InvoicesPage /></RoleGuard>} />
         <Route path="staff/petshop" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><PetshopPage /></RoleGuard>} />
+        <Route path="staff/petshop/create" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><ProductFormPage /></RoleGuard>} />
+        <Route path="staff/petshop/:id" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><ProductDetailPage /></RoleGuard>} />
+        <Route path="staff/petshop/:id/edit" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><ProductFormPage /></RoleGuard>} />
         <Route path="staff/grooming" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><GroomingPage /></RoleGuard>} />
         <Route path="staff/inpatient" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InpatientPage /></RoleGuard>} />
         <Route path="staff/accounting" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><AccountingPage /></RoleGuard>} />
@@ -101,6 +126,10 @@ export function AppRoutes() {
         <Route path="staff/notifications/templates" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><TemplatesPage /></RoleGuard>} />
         <Route path="staff/notifications/broadcast" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><BroadcastPage /></RoleGuard>} />
         <Route path="staff/reports/financial" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><FinancialReportsPage /></RoleGuard>} />
+        <Route path="staff/reports/clinical" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><ClinicalReportsPage /></RoleGuard>} />
+        <Route path="staff/reports/doctors" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><DoctorReportsPage /></RoleGuard>} />
+        <Route path="staff/reports/inventory" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><InventoryReportsPage /></RoleGuard>} />
+        <Route path="staff/reports/products" element={<RoleGuard allowedRoles={[ 'owner', 'staff' ]}><ProductReportsPage /></RoleGuard>} />
         <Route path="doctor/medical-records" element={<RoleGuard allowedRoles={[ 'owner', 'doctor' ]}><MedicalRecordsPage /></RoleGuard>} />
         <Route path="doctor/medical-records/create" element={<RoleGuard allowedRoles={[ 'owner', 'doctor' ]}><CreateMedicalRecordPage /></RoleGuard>} />
         <Route path="doctor/medical-records/:id" element={<RoleGuard allowedRoles={[ 'owner', 'doctor' ]}><MedicalRecordDetailPage /></RoleGuard>} />

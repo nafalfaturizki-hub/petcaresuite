@@ -23,6 +23,15 @@ export interface ProductVariant {
   createdAt: string;
 }
 
+export interface ProductImage {
+  id: string;
+  productId: string;
+  url: string;
+  isPrimary: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -37,6 +46,7 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   variants: ProductVariant[];
+  images?: ProductImage[];
 }
 
 export interface ProductQueryParams {
@@ -58,6 +68,11 @@ export interface ProductPayload {
   description?: string;
 }
 
+export interface ProductUpdatePayload extends Partial<ProductPayload> {
+  variants?: Array<Partial<ProductVariant> & { id?: string }>;
+  images?: File[] | Array<{ url: string }>; // files to upload or existing urls
+}
+
 export interface ProductVariantPayload {
   productId: string;
   name: string;
@@ -66,4 +81,14 @@ export interface ProductVariantPayload {
   color?: string;
   price: number;
   stock: number;
+}
+
+export interface ProductVariantUpdatePayload {
+  id?: string;
+  name?: string;
+  size?: string;
+  weight?: number;
+  color?: string;
+  price?: number;
+  stock?: number;
 }

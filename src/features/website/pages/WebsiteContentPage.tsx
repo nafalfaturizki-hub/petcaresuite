@@ -20,7 +20,7 @@ export default function WebsiteContentPage() {
                 <p className="text-sm text-slate-600 mt-2">{JSON.stringify(sec.content).slice(0, 200)}</p>
               </div>
               <div>
-                <Button variant="ghost" onClick={() => setEditing(sec)}>Edit</Button>
+                <Button variant="outline" onClick={() => setEditing(sec)}>Edit</Button>
               </div>
             </div>
           </Card>

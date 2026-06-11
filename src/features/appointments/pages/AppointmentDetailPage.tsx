@@ -35,10 +35,11 @@ export default function AppointmentDetailPage() {
 
       <div className="mt-6 grid grid-cols-2 gap-4">
         <div className="p-4 border rounded">
-          <div><strong>Pet:</strong> {data.pet_id}</div>
-          <div><strong>Customer:</strong> {data.customer_id}</div>
-          <div><strong>Doctor:</strong> {data.doctor_id}</div>
-          <div><strong>Scheduled:</strong> {new Date(data.scheduled_at).toLocaleString()}</div>
+          <div><strong>Pet:</strong> {data.petId}</div>
+          <div><strong>Customer:</strong> {data.customerId}</div>
+          <div><strong>Doctor:</strong> {data.doctorId}</div>
+          <div><strong>Service:</strong> {data.service}</div>
+          <div><strong>Appointment date:</strong> {new Date(`${data.appointmentDate}T${data.startTime}`).toLocaleString()}</div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button disabled={mutation.isLoading || data.status !== 'scheduled'} onClick={() => updateStatus('checked_in')} className="px-3 py-1 border rounded disabled:opacity-50">Check-in</button>
             <button disabled={mutation.isLoading || data.status !== 'checked_in'} onClick={() => updateStatus('in_consultation')} className="px-3 py-1 border rounded disabled:opacity-50">Start</button>

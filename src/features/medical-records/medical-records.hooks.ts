@@ -16,7 +16,11 @@ export function useMedicalRecord(id?: string) {
 
 export function useCreateMedicalRecord() {
   const qc = useQueryClient();
-  return useMutation((payload: MedicalRecordCreatePayload) => medicalRecordsService.createMedicalRecord(payload), {
+  return useMutation<
+    MedicalRecord,
+    Error,
+    MedicalRecordCreatePayload
+  >((payload: MedicalRecordCreatePayload) => medicalRecordsService.createMedicalRecord(payload), {
     onSuccess: () => qc.invalidateQueries(['medicalRecords'])
   });
 }
@@ -49,7 +53,7 @@ export function useRemovePrescription() {
 export function useUploadAttachment() {
   const qc = useQueryClient();
   return useMutation(
-    ({ recordId, file }: { recordId: string; file: { name: string; url: string } }) => medicalRecordsService.uploadAttachment(recordId, file),
+    ({ recordId, file }: { recordId: string; file: File | { name: string; url: string } }) => medicalRecordsService.uploadAttachment(recordId, file),
     {
       onSuccess: (_data, variables) => qc.invalidateQueries(['medicalRecord', variables.recordId])
     }

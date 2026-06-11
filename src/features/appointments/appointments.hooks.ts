@@ -33,12 +33,18 @@ export function useDoctors(search?: string) {
   });
 }
 
-export function useGetDoctorAvailability(doctorId?: string, date?: string) {
+export function useGetDoctorAvailability(doctorId?: string, date?: string, serviceDuration?: number) {
   return useQuery(
-    ['doctorAvailability', doctorId, date],
-    () => (doctorId && date ? appointmentsService.getDoctorAvailability(doctorId, date) : null),
-    { enabled: !!doctorId && !!date }
+    ['doctorAvailability', doctorId, date, serviceDuration],
+    () => (doctorId && date && serviceDuration ? appointmentsService.getDoctorAvailability(doctorId, date, serviceDuration) : null),
+    { enabled: !!doctorId && !!date && !!serviceDuration }
   );
+}
+
+export function useServices(search?: string) {
+  return useQuery(['appointmentServices', search], () => appointmentsService.getServices(search), {
+    enabled: search === undefined || search !== undefined
+  });
 }
 
 export function useCalendarAppointments(from?: string, to?: string) {

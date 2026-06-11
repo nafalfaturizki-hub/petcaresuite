@@ -20,9 +20,9 @@ function mapPrescription(record: any): Prescription {
 function mapAttachment(record: any): MedicalAttachment {
   return {
     id: record.id,
-    filename: record.filename,
-    url: record.url,
-    uploadedAt: record.uploaded_at || record.uploadedAt
+    filename: record.file_name ?? record.filename,
+    url: record.file_url ?? record.url,
+    uploadedAt: record.created_at ?? record.uploaded_at ?? record.uploadedAt
   };
 }
 
@@ -37,7 +37,9 @@ function mapMedicalRecord(record: any): MedicalRecord {
     prescriptions: Array.isArray(record.prescriptions)
       ? record.prescriptions.map(mapPrescription)
       : [],
-    attachments: Array.isArray(record.attachments)
+    attachments: Array.isArray(record.medical_attachments)
+      ? record.medical_attachments.map(mapAttachment)
+      : Array.isArray(record.attachments)
       ? record.attachments.map(mapAttachment)
       : []
   };
@@ -83,7 +85,7 @@ export const medicalRecordsService = {
   async getMedicalRecordById(id: string): Promise<MedicalRecord | null> {
     const { data, error } = await supabase
       .from('medical_records')
-      .select('*, prescriptions(*), attachments(*)')
+      .select('*, prescriptions(*), medical_attachments(*)')
       .eq('id', id)
       .single();
 
@@ -92,26 +94,40 @@ export const medicalRecordsService = {
   },
 
   async createMedicalRecord(payload: MedicalRecordCreatePayload): Promise<MedicalRecord> {
-    const { prescriptions = [], attachments = [], ...recordPayload } = payload;
+    const { prescriptions = [], attachments = [], appointmentId, recordType, ...recordPayload } = payload;
     const { data: record, error } = await supabase
       .from('medical_records')
       .insert({
+        appointment_id: appointmentId ?? null,
         pet_id: recordPayload.petId,
         doctor_id: recordPayload.doctorId,
         date: recordPayload.date,
-        soap: recordPayload.soap
+        record_type: recordType,
+        subjective: recordPayload.soap.subjective,
+        objective: recordPayload.soap.objective,
+        assessment: recordPayload.soap.assessment,
+        plan: recordPayload.soap.plan,
+        notes: recordPayload.soap.plan
       })
       .select()
       .single();
 
     if (error || !record) throw new Error(error?.message || 'Unable to create medical record');
 
+    if (appointmentId) {
+      await supabase.from('appointments').update({ status: 'completed' }).eq('id', appointmentId);
+    }
+
     if (prescriptions.length) {
       await this.insertPrescriptions(record.id, prescriptions);
     }
 
-    if (attachments.length) {
-      await this.insertAttachments(record.id, attachments);
+    for (const attachment of attachments) {
+      if (attachment instanceof File) {
+        await this.uploadAttachment(record.id, attachment);
+      } else {
+        await this.insertAttachments(record.id, [attachment]);
+      }
     }
 
     const created = await this.getMedicalRecordById(record.id);
@@ -148,18 +164,40 @@ export const medicalRecordsService = {
     return true;
   },
 
-  async uploadAttachment(recordId: string, file: { name: string; url: string }) {
+  async uploadAttachment(recordId: string, file: File | { name: string; url: string }) {
+    let fileUrl = '';
+    let fileName = '';
+    let fileType = '';
+
+    if (file instanceof File) {
+      const path = `${recordId}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('medical-attachments').upload(path, file, { cacheControl: '3600', upsert: true });
+      if (uploadError) throw new Error(uploadError.message);
+      fileUrl = path;
+      fileName = file.name;
+      fileType = file.type || 'application/octet-stream';
+    } else {
+      fileUrl = file.url;
+      fileName = file.name;
+      fileType = 'application/octet-stream';
+    }
+
     const { data, error } = await supabase
-      .from('attachments')
-      .insert({ medical_record_id: recordId, filename: file.name, url: file.url })
+      .from('medical_attachments')
+      .insert({ medical_record_id: recordId, file_url: fileUrl, file_name: fileName, file_type: fileType })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    return mapAttachment(data);
+    return mapAttachment({
+      id: data.id,
+      filename: data.file_name,
+      url: data.file_url,
+      uploaded_at: data.created_at
+    });
   },
 
   async removeAttachment(id: string) {
-    const { error } = await supabase.from('attachments').delete().eq('id', id);
+    const { error } = await supabase.from('medical_attachments').delete().eq('id', id);
     if (error) throw new Error(error.message);
     return true;
   },
@@ -172,8 +210,13 @@ export const medicalRecordsService = {
   },
 
   async insertAttachments(recordId: string, attachments: Array<Omit<MedicalAttachment, 'id' | 'uploadedAt'>>) {
-    const rows = attachments.map((attachment) => ({ medical_record_id: recordId, filename: attachment.filename, url: attachment.url }));
-    const { error } = await supabase.from('attachments').insert(rows);
+    const rows = attachments.map((attachment) => ({
+      medical_record_id: recordId,
+      file_name: attachment.filename,
+      file_url: attachment.url,
+      file_type: 'application/octet-stream'
+    }));
+    const { error } = await supabase.from('medical_attachments').insert(rows);
     if (error) throw new Error(error.message);
     return true;
   }

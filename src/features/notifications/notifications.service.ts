@@ -13,19 +13,18 @@ export const notificationsService = {
   },
 
   async retryNotification(id: string) {
-    // mark pending and re-invoke edge function if available
     const { data, error } = await supabase.from('notifications_log').select('*').eq('id', id).single();
     if (error || !data) throw new Error(error?.message || 'Notification not found');
 
     await supabase.from('notifications_log').update({ status: 'pending', error_message: null }).eq('id', id);
 
     try {
-      // attempt to call edge function send-whatsapp or send-email depending on channel
       if (data.channel === 'whatsapp') {
         await supabase.functions.invoke('send-whatsapp', { body: { logId: id } as any } as any);
       } else if (data.channel === 'email') {
         await supabase.functions.invoke('send-email', { body: { logId: id } as any } as any);
       }
+      await supabase.from('notifications_log').update({ status: 'success', sent_at: new Date().toISOString(), error_message: null }).eq('id', id);
       return true;
     } catch (err) {
       await supabase.from('notifications_log').update({ status: 'failed', error_message: (err as Error).message }).eq('id', id);
@@ -34,15 +33,24 @@ export const notificationsService = {
   },
 
   async getTemplates(): Promise<NotificationTemplate[]> {
-    const { data, error } = await supabase.from('notification_templates').select('*').order('updated_at', { ascending: false });
+    const { data, error } = await supabase.from('settings').select('value').eq('key', 'notification_templates').single();
     if (error) throw new Error(error.message);
-    return (data || []) as NotificationTemplate[];
+    const templates = data?.value ?? [];
+    return Array.isArray(templates) ? templates : [];
   },
 
   async updateTemplate(id: string, updates: Partial<NotificationTemplate>) {
-    const { data, error } = await supabase.from('notification_templates').update(updates).eq('id', id).select().single();
-    if (error || !data) throw new Error(error?.message || 'Unable to update template');
-    return data as NotificationTemplate;
+    const { data, error } = await supabase.from('settings').select('value').eq('key', 'notification_templates').single();
+    if (error || !data) throw new Error(error?.message || 'Unable to load templates');
+    const templates = Array.isArray(data.value) ? data.value : [];
+    const found = templates.some((template: any) => template.id === id);
+    if (!found) throw new Error('Template not found');
+    const updatedTemplates = templates.map((template: any) =>
+      template.id === id ? { ...template, ...updates, updatedAt: new Date().toISOString() } : template
+    );
+    const { error: updateError } = await supabase.from('settings').update({ value: updatedTemplates }).eq('key', 'notification_templates');
+    if (updateError) throw new Error(updateError.message);
+    return updatedTemplates.find((template: any) => template.id === id) as NotificationTemplate;
   },
 
   async getWhatsAppConfig(): Promise<WhatsAppConfig | null> {
@@ -94,7 +102,6 @@ export const notificationsService = {
 
   async broadcast({ templateKey, segment = 'all', payload = {} }: any) {
     // segment can be: all, vip, upcoming_vaccination
-    // create entries in notifications_log for matching recipients and return count
     let recipients: string[] = [];
     if (segment === 'all') {
       const { data } = await supabase.from('customers').select('whatsapp');
@@ -104,16 +111,73 @@ export const notificationsService = {
       recipients = (data || []).map((r: any) => r.whatsapp).filter(Boolean);
     } else if (segment === 'upcoming_vaccination') {
       const { data } = await supabase.from('vaccination_reminders').select('vaccination_record_id').gt('remind_at', new Date().toISOString());
-      // map to customer numbers via join (simplified)
-      // fallback: empty
+      const recordIds = (data || []).map((r: any) => r.vaccination_record_id);
+      if (recordIds.length) {
+        const { data: recs } = await supabase.from('vaccination_records').select('pet_id').in('id', recordIds);
+        const petIds = (recs || []).map((r: any) => r.pet_id);
+        if (petIds.length) {
+          const { data: pets } = await supabase.from('pets').select('customer_id').in('id', petIds);
+          const customerIds = (pets || []).map((p: any) => p.customer_id);
+          if (customerIds.length) {
+            const { data: customers } = await supabase.from('customers').select('whatsapp').in('id', customerIds);
+            recipients = (customers || []).map((c: any) => c.whatsapp).filter(Boolean);
+          }
+        }
+      }
     }
 
     const rows = recipients.map((r) => ({ channel: 'whatsapp', recipient: r, template_key: templateKey, payload, status: 'pending' }));
     if (!rows.length) return 0;
-    const { error } = await supabase.from('notifications_log').insert(rows);
-    if (error) throw new Error(error.message);
-    // ideally trigger worker; omitted for now
-    return rows.length;
+
+    const { data: inserted, error: insertErr } = await supabase.from('notifications_log').insert(rows).select();
+    if (insertErr) throw new Error(insertErr.message);
+
+    const chunk = (arr: any[], size = 10) => {
+      const out: any[][] = [];
+      for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+      return out;
+    };
+
+    const batches = chunk(inserted || [], 10);
+    for (const batch of batches) {
+      await Promise.all(batch.map(async (row: any) => {
+        try {
+          await supabase.functions.invoke('send-whatsapp', { body: { logId: row.id } as any } as any);
+          await supabase.from('notifications_log').update({ status: 'success', sent_at: new Date().toISOString(), error_message: null }).eq('id', row.id);
+        } catch (err) {
+          await supabase.from('notifications_log').update({ status: 'failed', error_message: (err as Error).message }).eq('id', row.id);
+        }
+      }));
+    }
+
+    return (inserted || []).length;
+  },
+
+  async getBroadcastCount(segment: string) {
+    let recipients: string[] = [];
+    if (segment === 'all') {
+      const { data } = await supabase.from('customers').select('whatsapp');
+      recipients = (data || []).map((r: any) => r.whatsapp).filter(Boolean);
+    } else if (segment === 'vip') {
+      const { data } = await supabase.from('customers').select('whatsapp').eq('membership_tier', 'vip');
+      recipients = (data || []).map((r: any) => r.whatsapp).filter(Boolean);
+    } else if (segment === 'upcoming_vaccination') {
+      const { data } = await supabase.from('vaccination_reminders').select('vaccination_record_id').gt('remind_at', new Date().toISOString());
+      const recordIds = (data || []).map((r: any) => r.vaccination_record_id);
+      if (recordIds.length) {
+        const { data: recs } = await supabase.from('vaccination_records').select('pet_id').in('id', recordIds);
+        const petIds = (recs || []).map((r: any) => r.pet_id);
+        if (petIds.length) {
+          const { data: pets } = await supabase.from('pets').select('customer_id').in('id', petIds);
+          const customerIds = (pets || []).map((p: any) => p.customer_id);
+          if (customerIds.length) {
+            const { data: customers } = await supabase.from('customers').select('whatsapp').in('id', customerIds);
+            recipients = (customers || []).map((c: any) => c.whatsapp).filter(Boolean);
+          }
+        }
+      }
+    }
+    return recipients.length;
   }
 };
 

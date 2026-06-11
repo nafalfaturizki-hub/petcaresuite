@@ -12,6 +12,7 @@ export default function CreateMedicalRecordPage() {
   const [petId, setPetId] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [date, setDate] = useState('');
+  const [recordType, setRecordType] = useState('consultation');
   const [soap, setSoap] = useState({ subjective: '', objective: '', assessment: '', plan: '' });
   const [prescriptions, setPrescriptions] = useState([emptyPrescription]);
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -69,10 +70,11 @@ export default function CreateMedicalRecordPage() {
     const payload = {
       petId,
       doctorId,
+      recordType,
       date,
       soap,
       prescriptions: filteredPrescriptions,
-      attachments: attachments.map((file) => ({ filename: file.name, url: `/uploads/${encodeURIComponent(file.name)}` }))
+      attachments
     };
 
     try {
@@ -82,6 +84,8 @@ export default function CreateMedicalRecordPage() {
       setErrors({ form: error?.message || 'Failed to create medical record' });
     }
   }
+
+  const isSaving = mutation.isPending;
 
   return (
     <div className="p-6 space-y-6">
@@ -106,6 +110,19 @@ export default function CreateMedicalRecordPage() {
             <label className="block text-sm font-medium text-slate-700">Visit Date</label>
             <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Record Type</label>
+            <select
+              value={recordType}
+              onChange={(event) => setRecordType(event.target.value)}
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            >
+              <option value="consultation">Consultation</option>
+              <option value="follow-up">Follow-up</option>
+              <option value="emergency">Emergency</option>
+              <option value="surgery">Surgery</option>
+            </select>
           </div>
         </div>
 
@@ -220,9 +237,9 @@ export default function CreateMedicalRecordPage() {
         {errors.form && <p className="text-sm text-red-600">{errors.form}</p>}
 
         <div className="flex items-center gap-3">
-          <Button type="submit" disabled={mutation.isLoading}>
+          <Button type="submit" disabled={isSaving}>
             <Upload className="w-4 h-4 mr-2" />
-            {mutation.isLoading ? 'Saving...' : 'Save Record'}
+            {isSaving ? 'Saving...' : 'Save Record'}
           </Button>
           <Button type="button" variant="outline" onClick={() => navigate('/doctor/medical-records')}>
             Cancel

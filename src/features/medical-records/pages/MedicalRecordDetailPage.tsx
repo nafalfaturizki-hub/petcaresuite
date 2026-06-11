@@ -49,7 +49,7 @@ export default function MedicalRecordDetailPage() {
 
   const handleUpload = async () => {
     if (!id || !attachmentFile) return;
-    await uploadAttachment.mutateAsync({ recordId: id, file: { name: attachmentFile.name, url: `/uploads/${encodeURIComponent(attachmentFile.name)}` } });
+    await uploadAttachment.mutateAsync({ recordId: id, file: attachmentFile });
     setAttachmentFile(null);
   };
 

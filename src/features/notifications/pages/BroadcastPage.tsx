@@ -8,6 +8,13 @@ export default function BroadcastPage() {
   const broadcast = useBroadcast();
   const [templateKey, setTemplateKey] = useState('');
   const [segment, setSegment] = useState('all');
+  const [recipientCount, setRecipientCount] = useState<number | null>(null);
+
+  async function handlePreview() {
+    if (!segment) return;
+    const count = await notificationsService.getBroadcastCount(segment);
+    setRecipientCount(count);
+  }
 
   async function handleSend() {
     await broadcast.mutateAsync({ templateKey, segment });

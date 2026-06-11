@@ -1,14 +1,21 @@
-export type AppointmentStatus = 'scheduled' | 'checked_in' | 'in_consultation' | 'completed' | 'cancelled';
+export type AppointmentStatus = 'scheduled' | 'confirmed' | 'checked_in' | 'in_consultation' | 'completed' | 'cancelled';
 
 export interface Appointment {
   id: string;
   queueNumber?: string | null;
   customerId: string;
+  customerName?: string | null;
   petId: string;
+  petName?: string | null;
   doctorId?: string | null;
+  doctorName?: string | null;
+  serviceId: string;
   service: string;
   notes?: string | null;
-  scheduledAt: string; // ISO
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
+  scheduledAt: string;
   status: AppointmentStatus;
   createdAt?: string;
 }
@@ -16,14 +23,28 @@ export interface Appointment {
 export interface AppointmentFormData {
   customerId: string;
   petId: string;
-  service: string;
+  serviceId: string;
   doctorId?: string;
-  scheduledAt: string;
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
   notes?: string;
+}
+
+export interface AppointmentServiceOption {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  price: number;
+}
+
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
 }
 
 export interface DoctorAvailability {
   doctorId: string;
   date: string;
-  slots: string[]; // ISO times
+  slots: TimeSlot[];
 }

@@ -17,6 +17,7 @@ export interface InventoryItem {
   id: string;
   name: string;
   categoryId: string;
+  categoryName?: string;
   unit: string;
   minStock: number;
   currentStock: number;
@@ -29,7 +30,9 @@ export interface InventoryItem {
 export interface InventoryBatch {
   id: string;
   itemId: string;
+  itemName?: string;
   supplierId?: string | null;
+  supplierName?: string | null;
   batchNumber: string;
   quantity: number;
   expiryDate?: string | null;
@@ -41,7 +44,9 @@ export interface InventoryBatch {
 export interface StockMovement {
   id: string;
   itemId: string;
+  itemName?: string;
   batchId?: string | null;
+  batchNumber?: string | null;
   movementType: 'inbound' | 'outbound' | 'adjustment';
   quantity: number;
   referenceType?: string | null;
@@ -51,10 +56,55 @@ export interface StockMovement {
   createdAt: string;
 }
 
+export interface InventoryValue {
+  categoryId: string;
+  categoryName: string;
+  totalValue: number;
+}
+
 export interface InventoryQueryParams {
   page?: number;
   pageSize?: number;
   search?: string;
   categoryId?: string;
-  supplierId?: string;
+  lowStock?: boolean;
+  isActive?: boolean;
+}
+
+export interface BatchQueryParams {
+  itemId: string;
+}
+
+export interface StockMovementQueryParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  type?: 'inbound' | 'outbound' | 'adjustment';
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface InventoryItemPayload {
+  name: string;
+  categoryId: string;
+  unit: string;
+  minStock: number;
+  currentStock: number;
+  pricePerUnit: number;
+  isActive?: boolean;
+}
+
+export interface InventoryBatchPayload {
+  itemId: string;
+  supplierId?: string | null;
+  batchNumber: string;
+  quantity: number;
+  expiryDate?: string | null;
+  purchasePrice: number;
+}
+
+export interface AdjustStockPayload {
+  itemId: string;
+  quantity: number;
+  reason: string;
 }

@@ -32,12 +32,14 @@ export interface MedicalRecord {
 }
 
 export interface MedicalRecordCreatePayload {
+  appointmentId?: string | null;
   petId: string;
   doctorId: string;
+  recordType: string;
   date: string;
   soap: SOAPData;
   prescriptions?: Array<Omit<Prescription, 'id'>>;
-  attachments?: Array<Omit<MedicalAttachment, 'id' | 'uploadedAt'>>;
+  attachments?: Array<File | Omit<MedicalAttachment, 'id' | 'uploadedAt'>>;
 }
 
 export interface MedicalRecordsQueryParams {

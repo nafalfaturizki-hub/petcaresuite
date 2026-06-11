@@ -8,8 +8,8 @@ import { formatCurrency } from '@/lib/utils';
 
 export function InvoicesPage() {
   const { data, isLoading, refetch } = useInvoices({ page: 1, pageSize: 20 });
-  const invoices = data?.items ?? [];
-  const totalRevenue = useMemo(() => invoices.reduce((sum, invoice) => sum + invoice.total, 0), [invoices]);
+  const invoices = ((data as { items?: any })?.items ?? []) as any[];
+  const totalRevenue = useMemo(() => invoices.reduce((sum: number, invoice: any) => sum + Number(invoice.total ?? 0), 0), [invoices]);
 
   return (
     <div className="space-y-6">
@@ -36,12 +36,12 @@ export function InvoicesPage() {
 
       <Card className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <DataTable
-          columns={[
-            { key: 'invoiceNumber', title: 'Invoice' },
-            { key: 'paymentMethod', title: 'Payment' },
-            { key: 'status', title: 'Status' },
-            { key: 'total', title: 'Total', render: (record: any) => formatCurrency(record.total) }
-          ]}
+            columns={[
+              { key: 'invoiceNumber', header: 'Invoice' },
+              { key: 'paymentMethod', header: 'Payment' },
+              { key: 'status', header: 'Status' },
+              { key: 'total', header: 'Total', render: (record: any) => formatCurrency(record.total) }
+            ]}
           data={invoices}
           isLoading={isLoading}
           emptyTitle="No invoices yet"
